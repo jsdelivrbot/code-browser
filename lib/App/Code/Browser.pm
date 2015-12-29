@@ -5,6 +5,8 @@ use File::Basename;
 use Dancer2;
 use Data::Dumper;
 use Cwd;
+use File::Temp qw{tempdir};
+use File::Fetch;
 
 our $VERSION = '0.1';
 
@@ -21,10 +23,17 @@ sub untar {
     # Kill duplicate . to stop paths like ../../
     my $toPath = inData($projname =~ s/\.+/\./gr);
     debug $toPath;
-    my $archive = Archive::Extract->new(archive => $uploaded->tempname);
+    my $archive = Archive::Extract->new( archive => $uploaded );
     mkdir $toPath;
     $archive->extract(to => $toPath);
     debug "Extracted to:" . $archive->extract_path;
+};
+
+sub getRemote {
+    my $url = shift;
+    my $ff = File::Fetch->new(uri => $url);
+    my $tempname = $ff->fetch(to => tempdir()) || die "Couldn't fetch $url!";
+    return $tempname;
 };
 
 sub getViewables {
@@ -50,17 +59,39 @@ get '/' => sub {
 post '/upload' => sub {
     delayed {
         my $name = param('projname');
-        my $tar = upload('tarball');
+        my $tarUpload = upload('tarball');
+        my $tarPath = "";
+        my $url = param('url');
+
+        debug "Url: $url";
+        debug "Name: $name";
         debug Dumper(request->uploads);
         debug Dumper(request->params);
         debug Dumper(upload('tarball'));
-        debug "Name: $name";
 
+        die "Must specify exactly one of URL or file upload." 
+            unless defined($tarUpload) || defined($url);
+
+        content "Resolving tar file...";
+        flush;
+
+        if (!$tarUpload) {
+            debug "Going to start download...";
+            $tarPath = getRemote($url);
+            debug "Done!";
+        } else {
+            # Must have gotten an archive uploaded
+            $tarPath = $tarUpload->tempname;
+        }
+
+        $tarPath || die "Something went wrong finding your upload.";
+
+        content "Done resolving tar file.";
         content "Uploading... $name";
         flush;
 
-        untar($tar, $name);
-        content 'Done!';
+        untar($tarPath, $name);
+        content 'Done uploading.';
 
         done;
     }

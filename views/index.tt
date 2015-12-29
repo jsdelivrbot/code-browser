@@ -1,14 +1,15 @@
 <div id="page">
     <div id="content">
     <h1> Upload! </h1>
-    <form action="/upload" method="post" enctype="multipart/form-data">
-        <input type="file" name="tarball" required>
-        <input type="text" name="projname" required>
-        <input type="submit" 
-            value="Upload directory" 
-            name="submit"
-            onclick="this.disabled=true"
-        >
+    <form action="/upload" 
+        method="post" 
+        enctype="multipart/form-data"
+        onsubmit="submit.disabled = true; return true"
+    >
+        File: <input type="file" name="tarball"> <br />
+        URL: <input type="text" name="url"> <br />
+        Name: <input type="text" name="projname" required>
+        <input type="submit" value="Upload directory" name="submit">
     </form>
     <% INCLUDE views/dir.tt %>
 </div>
