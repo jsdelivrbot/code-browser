@@ -1,0 +1,5 @@
+<script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"></script>
+<div>
+    <h1> <% relpath %> </h1>
+    <code class="prettyprint linums"> <% filecontents %> </code>
+</div>

@@ -18,23 +18,24 @@ sub inData {
 
 sub untar {
     my ($uploaded, $projname) = @_;
-    my $toPath = inData($projname);
+    # Kill duplicate . to stop paths like ../../
+    my $toPath = inData($projname =~ s/\.+/\./gr);
     debug $toPath;
-    # Need to preprocess in case we got something with ..
     my $archive = Archive::Extract->new(archive => $uploaded->tempname);
     mkdir $toPath;
     $archive->extract(to => $toPath);
     debug "Extracted to:" . $archive->extract_path;
 };
 
-sub getDirectories {
-    opendir(my $dh, $DATA_DIR) || die "Error reading $DATA_DIR!";
-    grep { !/^\./ && -d "$DATA_DIR/$_" } readdir $dh;
+sub getViewables {
+    my $path = "$DATA_DIR/" . (shift // "");
+    opendir(my $dh, $path) || die "Error reading $path!";
+    grep { !/^\./ } readdir $dh;
 };
 
 get '/' => sub {
     my %templateVars = (
-        files => [ getDirectories() ],
+        files => [ getViewables() ],
     );
     my $here = getcwd;
     debug "You are $here";
@@ -60,13 +61,32 @@ post '/upload' => sub {
     }
 };
 
+sub renderFile {
+    my ($relpath, $abspath) = @_;
+    open my $fh, '<', $abspath or die "Can't open: $abspath";    
+    my $templateArgs = {
+        relpath => $relpath,
+        filecontents => do { local $/; <$fh> },
+    };
+    template("code", $templateArgs);
+};
+
 get '/view/**' => sub {
     # We don't need to sanitize because '/view/..' is interpeted as '/'
     my ($pathElementRef) = splat;
-    my @pathElements = @{$pathElementRef};
-    my $path = inData(join("/", @pathElements));
+    my $relpath = join("/", @{$pathElementRef});
+    my $path = inData($relpath);
     debug $path;
-    return $path;
+
+    if (-f $path) {
+        debug "I'm a file! $path";
+        return renderFile($relpath, $path);
+    } elsif (-d $path) {
+        return "I'm a directory! $path";
+    } else {
+        # TODO(pscollins): Strictly speaking this is a vulnerability
+        send_error "Tried to view the wrong kind of thing @ $path", 404;
+    }
 };
 
 
