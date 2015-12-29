@@ -2,14 +2,14 @@
     <div id="content">
     <h1> Upload! </h1>
     <form action="/upload" method="post">
-        <input type="file" name="taraball">
-        <input type="text" name="projname">
+        <input type="file" name="tarball" required>
+        <input type="text" name="projname" required>
         <input type="submit" value="Upload directory" name="submit">
     </form>
-    <h1> Current files: </h1>
+    <h1> Current directories: </h1>
     <ol>
         <% FOREACH file IN files %>
-            <li> <% file %> </li>
+            <li> <a href="/view/<% file %>"> <% file %> </a></li>
         <% END %>
     </ol>
     </div>
