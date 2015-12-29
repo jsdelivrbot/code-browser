@@ -1,0 +1,10 @@
+<% DEFAULT 
+    currPath = "/"
+%>
+
+<h1> Current path: <% currPath %> </h1>
+<ol> 
+    <% FOREACH entry IN entries %>
+        <li> <a href="/view/<% entry %>"> <% entry %> </a> </li>
+    <% END %>
+</ol>

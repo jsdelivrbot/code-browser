@@ -1,5 +1,11 @@
 <script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"></script>
+
+<!-- Hack to get numbers on every line --!>
+<style>
+    .prettyprint ol.linenums > li { list-style-type: decimal; }
+</style>  
+
 <div>
-    <h1> <% relpath %> </h1>
-    <code class="prettyprint linums"> <% filecontents %> </code>
+    <h1> <% relpath %> </h1> <a href="."> up </a>
+    <pre class="prettyprint linenums"><% filecontents %></pre>
 </div>

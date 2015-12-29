@@ -28,14 +28,19 @@ sub untar {
 };
 
 sub getViewables {
-    my $path = "$DATA_DIR/" . (shift // "");
+    my $prefix = shift // "";
+    my $path = "$DATA_DIR/$prefix";
     opendir(my $dh, $path) || die "Error reading $path!";
-    grep { !/^\./ } readdir $dh;
+    # Drop only . because it's useless and messes stuff up
+    sort map { s/^\///gr } 
+         map { "$prefix/$_" } 
+         grep { !/^\.$/ } 
+         readdir $dh;
 };
 
 get '/' => sub {
     my %templateVars = (
-        files => [ getViewables() ],
+        entries => [ getViewables() ],
     );
     my $here = getcwd;
     debug "You are $here";
@@ -71,6 +76,15 @@ sub renderFile {
     template("code", $templateArgs);
 };
 
+sub renderDir {
+    my $relpath = shift;
+    my $templateArgs = {
+        entries => [ getViewables($relpath) ],
+    };
+
+    template("dir", $templateArgs);
+}
+
 get '/view/**' => sub {
     # We don't need to sanitize because '/view/..' is interpeted as '/'
     my ($pathElementRef) = splat;
@@ -78,11 +92,12 @@ get '/view/**' => sub {
     my $path = inData($relpath);
     debug $path;
 
-    if (-f $path) {
+    if (-T $path) {
         debug "I'm a file! $path";
         return renderFile($relpath, $path);
     } elsif (-d $path) {
-        return "I'm a directory! $path";
+        debug "I'm a directory! $path";
+        return renderDir($relpath);
     } else {
         # TODO(pscollins): Strictly speaking this is a vulnerability
         send_error "Tried to view the wrong kind of thing @ $path", 404;
