@@ -47,7 +47,8 @@ sub getViewables {
          readdir $dh;
 };
 
-get '/' => sub {
+# Easier to have /view match here than to forward from /view to /
+get qr{/(view)?} => sub {
     my %templateVars = (
         entries => [ getViewables() ],
     );
