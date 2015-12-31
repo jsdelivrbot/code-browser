@@ -19,8 +19,8 @@ WriteMakefile(
     PREREQ_PM => {
         'Test::More' => 0,
         'YAML'       => 0,
-        'Dancer2'     => 0.165000,
         'Data::Dumper' => 0,
+        'Dancer2'     => 0.165000,
         'Archive::Extract' => 0,
     },
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
