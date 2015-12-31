@@ -6,5 +6,5 @@ ADD . $appdir/
 
 EXPOSE $port
 WORKDIR $appdir
-RUN cpan .
-ENTRYPOINT plackup -R $appdir/lib/ -p $PORT $appdir/bin/app.psgi
+RUN perl Makefile.PL && make clean && cpanm . --notest
+ENTRYPOINT ["plackup", "-R lib/", "-p $port", "bin/app.psgi"]

@@ -22,6 +22,7 @@ WriteMakefile(
         'Data::Dumper' => 0,
         'Dancer2'     => 0.165000,
         'Archive::Extract' => 0,
+        'Template' => 0,
     },
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean               => { FILES => 'App-Code-Browser-*' },

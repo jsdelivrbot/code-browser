@@ -91,7 +91,6 @@ post '/upload' => sub {
         flush;
 
         untar($tarPath, $name);
-        content 'Done uploading.';
 
         done;
     }
